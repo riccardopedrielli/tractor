@@ -2,6 +2,7 @@
 #define SEARCH_H
 
 #include <QtGui>
+#include "TClient.h"
 
 class SearchTab : public QTabBar
 {
@@ -24,14 +25,16 @@ class SearchView : public QTreeWidget
 	Q_OBJECT
 
 public:
-	SearchView();
+	int id;
+	SearchView(TClient *cp, int sid);
 
 private:
+	TClient *client;
 	QMenu *menu;
 	QAction *downloadAction;
 	void contextMenuEvent(QContextMenuEvent *event);
 
-signals:
+private slots:
 	void addToDownloads(QTreeWidgetItem *item);
 };
 
@@ -40,9 +43,11 @@ class SearchPage : public QWidget
 	Q_OBJECT
 
 public:
-	SearchPage();
+	SearchPage(TClient *cp);
 
 private:
+	int sid;
+	TClient *client;
 	QLineEdit *searchEdit;
 	QPushButton *searchButton;
 	SearchTab *searchTab;
@@ -51,6 +56,7 @@ private:
 private slots:
 	void deletePage();
 	void startNewSearch();
+	void addResult(QString fid, QString name, QString dim, QString sources, QString complete, QString sid);
 };
 
 #endif //SEARCH_H

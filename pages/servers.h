@@ -2,6 +2,7 @@
 #define SERVERS_H
 
 #include <QtGui>
+#include "TClient.h"
 
 class ServerView : public QTreeWidget
 {
@@ -26,9 +27,10 @@ class ServersPage : public QWidget
 	Q_OBJECT
 
 public:
-	ServersPage();
+	ServersPage(TClient *cp);
 
 private:
+	TClient *client;
 	QFileIconProvider *iconProvider;
 	ServerView *serverView;
 	QList<QTreeWidgetItem *> serverViewItems;
@@ -50,7 +52,8 @@ private:
 	void writeServerList();
 
 signals:
-	void newEvent(QString text);
+	void serverSelected(QString server);
+	void connectionRequest(QString ip, quint16 port);
 
 private slots:
 	void addServer();

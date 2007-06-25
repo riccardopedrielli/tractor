@@ -1,6 +1,6 @@
 #include "downloads.h"
 
-DownloadsPage::DownloadsPage()
+DownloadsPage::DownloadsPage(TClient *cp)
 {
-	
+	client = cp;
 }

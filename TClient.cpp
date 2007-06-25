@@ -3,10 +3,11 @@
 #include "TXml.h"
 #include "info_structs.h"
 
+#include <QMessageBox>
+
 TClient::TClient(QString shlipath, QString shpath, QString tmppath,
 				 QString inpath, quint16 serverport)
 {
-	sid = 0;
 	sharedlistpath = shlipath;
 	sharepath = shpath;
 	temppath = tmppath;
@@ -17,17 +18,29 @@ TClient::TClient(QString shlipath, QString shpath, QString tmppath,
 	connect(&client, SIGNAL(connected()), this, SLOT(onConnect()));
 	connect(&client, SIGNAL(readyRead()), this, SLOT(onRead()));
 	connect(&client, SIGNAL(disconnected()), this, SLOT(onDisconnect()));
-	connect(&client, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(error(QAbstractSocket::SocketError)));	
+	connect(&client, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(error(QAbstractSocket::SocketError)));
 	start();
 }
 
+bool TClient::isConnected()
+{
+	if(client.state() == QAbstractSocket::ConnectedState)
+		return true;
+	return false;
+}
+
 QStringList TClient::updateSharedList()
-{	
-	shared.checkShareList(sharedlistpath);
-	QStringList list;
-	list = shared.updateShareList(sharepath, sharedlistpath);	
-	list = list + shared.updateShareList(incomingpath, sharedlistpath);
-	return list;
+{
+	QStringList duplist, idlist;
+	idlist = shared.checkShareList(sharedlistpath);
+
+	int dim = idlist.count();
+	for (int i = 0; i < dim; i++)
+		client.write(TParser::delFile(idlist.at(i)).toAscii());
+
+	duplist = shared.updateShareList(sharepath, sharedlistpath);
+	duplist = duplist + shared.updateShareList(incomingpath, sharedlistpath);
+	return duplist;
 }
 
 void TClient::connectToServer(QString address, quint16 port)
@@ -45,23 +58,23 @@ void TClient::onConnect()
 	client.write(TParser::port(srvport).toAscii());
 	emit serverConnected();
 	QList<FileInfo> list = TXml::getFileList(sharedlistpath);
-	
-	int dim = list.count();	
+
+	int dim = list.count();
 	for (int i = 0; i<dim; i++)
 	{
 		int complete = 0;
 
 		if(list[i].completes == "yes")
-			complete=1;		
-			
+			complete=1;
+
 		client.write(TParser::addFile(list[i].fid,list[i].name,
-					list[i].dim.toULongLong(),complete).toAscii());	
+					list[i].dim.toULongLong(),complete).toAscii());
 	}
 }
 
 void TClient::onRead()
 {
-	QStringList cmdlist = TParser::splitCommands(client.readLine());	
+	QStringList cmdlist = TParser::splitCommands(client.readLine());
 	int dim = cmdlist.count();
 
 	for(int i=0; i < dim; i++)
@@ -80,7 +93,7 @@ void TClient::onRead()
 			QString name,dim,fid,complete,sources,sid;
 			if(!TParser::splitSendFile(cmdlist[i],sid,name,dim,sources,complete,fid))
 				return;
-			emit fileRecived(fid,name,dim,sources,complete,sid);
+			emit fileReceived(fid,name,dim,sources,complete,sid);
 		}
 		if (cmdname == "IP")
 		{
@@ -88,7 +101,7 @@ void TClient::onRead()
 			int dim;
 
 			if(!TParser::splitSendIp(cmdlist[i],fid,host,port))
-				return;			
+				return;
 
 			dim = transferslist.count();
 			for(int i=0; i < dim; i++)
@@ -113,13 +126,14 @@ void TClient::error(QAbstractSocket::SocketError socketerror)
 	emit connectionError(client.errorString());
 }
 
-void TClient::find(QString filename)
-{	
-	client.write(TParser::find(filename,++sid).toAscii());
+void TClient::find(QString filename, quint64 sid)
+{
+	client.write(TParser::find(filename, sid).toAscii());
 }
 
 void TClient::getFile(QString name, QString fid, QString dim)
-{    
+{
+	QMessageBox::information((QWidget *)parent(), "Debug information", "getFile(" + name + ", " + fid + ", " + dim + ")");
 	TTransfer *transfer = new TTransfer(name, fid, dim.toULongLong(), temppath,
 			incomingpath, sharedlistpath);
 
@@ -131,7 +145,7 @@ void TClient::getFile(QString name, QString fid, QString dim)
 
 void TClient::deleteTransfer(TTransfer *transfer)
 {
-	int dim = transferslist.count();	
+	int dim = transferslist.count();
 	for( int i=0; i<dim; i++)
 	{
 		if(transferslist[i] == transfer)

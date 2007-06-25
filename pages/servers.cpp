@@ -48,8 +48,10 @@ void ServerView::contextMenuEvent(QContextMenuEvent *event)
 	}
 }
 
-ServersPage::ServersPage()
+ServersPage::ServersPage(TClient *cp)
 {
+	client = cp;
+
 	/* Elements definition */
 	iconProvider = new QFileIconProvider;
 
@@ -94,13 +96,10 @@ ServersPage::ServersPage()
 	connect(addButton, SIGNAL(clicked()), this, SLOT(addServer()));
 	connect(serverView, SIGNAL(deleteServer(QTreeWidgetItem *)), this, SLOT(deleteServer(QTreeWidgetItem *)));
 	connect(serverView, SIGNAL(connectToServer(QTreeWidgetItem *)), this, SLOT(connectToServer(QTreeWidgetItem *)));
+	connect(serverView, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this, SLOT(connectToServer(QTreeWidgetItem *)));
 
 	/* Load server list */
-	#ifdef Q_OS_UNIX
 	serverFile = new QFile(QDir::homePath() + "/.tractor/server.list");
-	#else
-	serverFile = new QFile("server.list");
-	#endif
 	serverFile->open(QIODevice::ReadOnly | QIODevice::Text);
 	while(!serverFile->atEnd())
 	{
@@ -145,8 +144,7 @@ void ServersPage::addServer()
 {
 	if(ipEdit->text()=="" || portEdit->text()=="")
 	{
-		QMessageBox	*information = new QMessageBox(QMessageBox::Information, "Missing informations", "IP and Port are required.", QMessageBox::Ok, this);
-		information->show();
+		QMessageBox::information(this, "Missing informations", "IP and Port are required.");
 		return;
 	}
 	Server newServer;
@@ -159,8 +157,7 @@ void ServersPage::addServer()
 	{
 		if(serverList.at(i).ip==newServer.ip && serverList.at(i).port==newServer.port)
 		{
-			QMessageBox	*information = new QMessageBox(QMessageBox::Information, "Existing server", "There is already a server with the same IP and Port.", QMessageBox::Ok, this);
-			information->show();
+			QMessageBox::information(this, "Existing server", "There is already a server with the same IP and Port.");
 			return;
 		}
 	}
@@ -190,7 +187,10 @@ void ServersPage::deleteServer(QTreeWidgetItem *item)
 
 void ServersPage::connectToServer(QTreeWidgetItem *item)
 {
-	//int pos = serverViewItems.indexOf(item);
-	emit newEvent("Connecting to " + item->text(0) + "...");
-	//client->connectToServer(serverList.at(pos).ip, serverList.at(pos).ip.toShort());
+	int pos = serverViewItems.indexOf(item);
+	emit serverSelected((serverList.at(pos).name.isEmpty()) ? serverList.at(pos).ip : serverList.at(pos).name);
+	client->connectToServer(serverList.at(pos).ip, serverList.at(pos).port.toShort());
+	item->setForeground(0, QBrush(QColor(255, 0, 0)));
+	item->setForeground(1, QBrush(QColor(255, 0, 0)));
+	item->setForeground(2, QBrush(QColor(255, 0, 0)));
 }

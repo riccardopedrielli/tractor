@@ -14,7 +14,7 @@ private:
 
 public:
 	QStringList updateShareList(QString sharepath, QString sharedlistpath);	
-	void checkShareList(QString sharedlistpath);
+	QStringList checkShareList(QString sharedlistpath);
 };
 
 #endif //TSHARED_H

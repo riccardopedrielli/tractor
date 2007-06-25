@@ -2,6 +2,8 @@
 #define	CLIENTWINDOW_H
 
 #include <QtGui>
+#include "TClient.h"
+#include "TServer.h"
 #include "TSettings.h"
 #include "options.h"
 #include "ttoolbutton.h"
@@ -15,10 +17,13 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	MainWindow(TSettings *settingsPointer);
+	MainWindow();
 
 private:
 	TSettings *settings;
+	TServer *server;
+	TClient *client;
+	QString *selectedserver;
 
 	/* ToolBar elements */
 	TToolButton *serversButton;
@@ -40,7 +45,6 @@ private:
 	SharedPage *sharedPage;
 	DownloadsPage *downloadsPage;
 	QStatusBar	*statusBar;
-	OptionsWindow *optionsWindow;
 
 	/* Interface setup methods */
 	void setuptoolbar();
@@ -50,10 +54,10 @@ private:
 	void setTheme(QString theme);
 
 private slots:
-	void about();
-	void notImplemented();
 	void modifySettings();
-	void eventToStatusBar(QString text);
+	void showEvent(QString text);
+	void serverSelected(QString server);
+	void connectionSuccessful();
 };
 
 #endif //CLIENTWINDOW_H

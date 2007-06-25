@@ -64,9 +64,9 @@ void TShared::updateShareList(QDir dir, QStringList &duplicatedid, QString share
 	}
 }
 
-void TShared::checkShareList(QString sharedlistpath)
+QStringList TShared::checkShareList(QString sharedlistpath)
 {
-	QStringList pathlist = TXml::getPathList(sharedlistpath);
+	QStringList pathlist = TXml::getPathList(sharedlistpath), idlist;
 	QFileInfo file;
 	int dim = pathlist.count();
 
@@ -75,8 +75,15 @@ void TShared::checkShareList(QString sharedlistpath)
 		file = pathlist[i];
 
 		if (!file.exists())
+		{
+			QString name, id, lastmod, complete, path;
+			TXml::getFileInfo(sharedlistpath, TAG_PATH, pathlist[i], name, id, lastmod,
+				complete, path);
+			idlist.append(id);
 			TXml::deleteFile(sharedlistpath, TAG_PATH, pathlist[i]);		
+		}
 	}
+	return idlist;
 }
 
 QString TShared::createFileId(QString path)

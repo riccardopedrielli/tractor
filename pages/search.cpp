@@ -16,8 +16,11 @@ void SearchTab::contextMenuEvent(QContextMenuEvent *event)
 	}
 }
 
-SearchView::SearchView()
+SearchView::SearchView(TClient *cp, int sid)
 {
+	client = cp;
+	id = sid;
+
 	menu = new QMenu;
 	downloadAction = new QAction("Download", menu);
 	menu->addAction(downloadAction);
@@ -30,15 +33,17 @@ SearchView::SearchView()
 	header->setText(4, "File ID");
 
 	setHeaderItem(header);
-	setColumnWidth(0, 200);
-	setColumnWidth(1, 150);
-	setColumnWidth(2, 100);
-	setColumnWidth(3, 100);
+	setColumnWidth(0, 250);
+	setColumnWidth(1, 60);
+	setColumnWidth(2, 80);
+	setColumnWidth(3, 80);
 	setColumnWidth(4, 200);
 	setSortingEnabled(true);
 	setRootIsDecorated(false);
 	setSelectionBehavior(QAbstractItemView::SelectRows);
 	sortItems(0, Qt::AscendingOrder);
+
+	connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this, SLOT(addToDownloads(QTreeWidgetItem *)));
 }
 
 void SearchView::contextMenuEvent(QContextMenuEvent *event)
@@ -51,49 +56,31 @@ void SearchView::contextMenuEvent(QContextMenuEvent *event)
 	QAction *action = menu->exec(event->globalPos());
 	if(action == downloadAction)
 	{
-		emit addToDownloads(item);
+		addToDownloads(item);
 	}
 }
 
-SearchPage::SearchPage()
+void SearchView::addToDownloads(QTreeWidgetItem *item)
 {
+	QMessageBox::information(this, "Debug information", "getFile(" + item->text(0) + ", " + item->text(4).toLower() + ", " + item->data(1, Qt::ToolTipRole).toString() + ")");
+	client->getFile(item->text(0), item->text(4).toLower(), item->data(1, Qt::ToolTipRole).toString());
+}
+
+SearchPage::SearchPage(TClient *cp)
+{
+	sid = 0;
+	client = cp;
+
 	/* Elements definition */
 	searchEdit = new QLineEdit;
 	searchEdit->setFixedWidth(searchEdit->sizeHint().width()*2);
 	searchButton = new QPushButton("Search");
 
 	searchTab = new SearchTab;
-	searchTab->addTab("asd");
-	searchTab->addTab("lol");
-	searchTab->addTab("wtf");
-
-	SearchView *asdView = new SearchView;
-	SearchView *lolView = new SearchView;
-	SearchView *wtfView = new SearchView;
-	
-	QTreeWidgetItem *asd1 = new QTreeWidgetItem(asdView);
-	asd1->setText(0, "asd1");
-	QTreeWidgetItem *asd2 = new QTreeWidgetItem(asdView);
-	asd2->setText(0, "asd2");
-	QTreeWidgetItem *asd3 = new QTreeWidgetItem(asdView);
-	asd3->setText(0, "asd3");
-	QTreeWidgetItem *lol1 = new QTreeWidgetItem(lolView);
-	lol1->setText(0, "lol1");
-	QTreeWidgetItem *lol2 = new QTreeWidgetItem(lolView);
-	lol2->setText(0, "lol2");
-	QTreeWidgetItem *wtf1 = new QTreeWidgetItem(wtfView);
-	wtf1->setText(0, "wtf1");
-	QTreeWidgetItem *wtf2 = new QTreeWidgetItem(wtfView);
-	wtf2->setText(0, "wtf2");
-	QTreeWidgetItem *wtf3 = new QTreeWidgetItem(wtfView);
-	wtf3->setText(0, "wtf3");
-	QTreeWidgetItem *wtf4 = new QTreeWidgetItem(wtfView);
-	wtf4->setText(0, "wtf4");
 
 	searchPages = new QStackedWidget;
-	searchPages->addWidget(asdView);
-	searchPages->addWidget(lolView);
-	searchPages->addWidget(wtfView);
+	SearchView *emptySearch = new SearchView(client, sid);
+	searchPages->addWidget(emptySearch);
 
 	/* Layout definition */
 	QHBoxLayout *searchLayout = new QHBoxLayout;
@@ -110,11 +97,12 @@ SearchPage::SearchPage()
 	mainLayout->addWidget(searchTab);
 	mainLayout->addWidget(searchPages);
 	setLayout(mainLayout);
-	
+
 	/* Connections */
 	connect(searchTab, SIGNAL(currentChanged(int)), searchPages, SLOT(setCurrentIndex(int)));
 	connect(searchTab, SIGNAL(deletePage()), this, SLOT(deletePage()));
 	connect(searchButton, SIGNAL(clicked()), this, SLOT(startNewSearch()));
+	connect(searchEdit, SIGNAL(returnPressed()), this, SLOT(startNewSearch()));
 }
 
 void SearchPage::deletePage()
@@ -125,13 +113,18 @@ void SearchPage::deletePage()
 	searchTab->removeTab(searchTab->currentIndex());
 	if(searchTab->count() == 0)
 	{
-		SearchView *emptySearch = new SearchView;
+		SearchView *emptySearch = new SearchView(client, sid);
 		searchPages->addWidget(emptySearch);
 	}
 }
 
 void SearchPage::startNewSearch()
 {
+	if(!client->isConnected())
+	{
+		QMessageBox::information(this, "Not connected", "You are not connected to any server.\nYou have to be connected to a server in order to do a search.");
+		return;
+	}
 	if(searchEdit->text() == "")
 	{
 		QMessageBox::information(this, "Empty search", "You have to write something to search.");
@@ -139,8 +132,63 @@ void SearchPage::startNewSearch()
 	}
 	if(searchTab->count() > 0)
 	{
-		SearchView *newSearch = new SearchView;
+		SearchView *newSearch = new SearchView(client, sid);
 		searchPages->addWidget(newSearch);
 	}
 	searchTab->addTab(searchEdit->text());
+	searchTab->setCurrentIndex(searchTab->count()-1);
+	client->find(searchEdit->text(), sid);
+	sid++;
+}
+
+void SearchPage::addResult(QString fid, QString name, QString dim, QString sources, QString complete, QString sid)
+{
+	int n = searchPages->count();
+	for(int i=0; i<n; i++)
+	{
+		if(((SearchView *)searchPages->widget(i))->id == sid.toInt())
+		{
+			QString bytes = dim;
+			float size = dim.toInt();
+			int unit = 0;
+			while(size >= 1024 && unit < 5)
+			{
+				size /= 1024;
+				unit++;
+			}
+			switch(unit)
+			{
+				case 0:
+					dim = dim.setNum(size, 'f', 2) + " B";
+					break;
+				case 1:
+					dim = dim.setNum(size, 'f', 2) + " KB";
+					break;
+				case 2:
+					dim = dim.setNum(size, 'f', 2) + " MB";
+					break;
+				case 3:
+					dim = dim.setNum(size, 'f', 2) + " GB";
+					break;
+				case 4:
+					dim = dim.setNum(size, 'f', 2) + " TB";
+					break;
+			}
+			complete = QVariant(complete.toInt()*100/sources.toInt()).toString() + "%";
+			fid = fid.toUpper();
+			QTreeWidgetItem *newResult = new QTreeWidgetItem;
+			newResult->setText(0, name);
+			newResult->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
+			newResult->setText(1, dim);
+			newResult->setData(1, Qt::ToolTipRole, bytes);
+			newResult->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
+			newResult->setText(2, sources);
+			newResult->setTextAlignment(3, Qt::AlignRight | Qt::AlignVCenter);
+			newResult->setText(3, complete);
+			newResult->setText(4, fid);
+			newResult->setSizeHint(0, QSize(newResult->sizeHint(0).width(), 18));
+			((SearchView *)searchPages->widget(i))->addTopLevelItem(newResult);
+			break;
+		}
+	}
 }

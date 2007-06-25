@@ -13,7 +13,6 @@ class TClient : public QThread
 private:
 	QTcpSocket client;
 	TShared shared;
-	quint64 sid;
 
 	//general settings
 	quint16 srvport;
@@ -31,12 +30,13 @@ public:
 	TClient(QString shlipath, QString shpath, QString tmppath,
 				 QString inpath, quint16 serverport);
 	void connectToServer(QString address, quint16 port);
-	void find(QString filename);
+	void find(QString filename, quint64 sid);
 	void getFile(QString name, QString fid, QString dim);
+	bool isConnected();
 	QStringList updateSharedList();
 
 signals:
-	void fileRecived(QString fid, QString name, QString dim, QString sources, 
+	void fileReceived(QString fid, QString name, QString dim, QString sources, 
 		QString complete, QString sid);
 	void serverConnected();
 	void serverDisconnected();

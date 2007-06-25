@@ -1,6 +1,7 @@
 #include "shared.h"
 
-SharedPage::SharedPage()
+SharedPage::SharedPage(TClient *cp)
 {
+	client = cp;
 	setFrameShape(QFrame::StyledPanel);
 }

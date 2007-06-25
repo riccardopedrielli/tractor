@@ -1,13 +1,20 @@
 #include "mainwindow.h"
 
-MainWindow::MainWindow(TSettings *settingsPointer)
+MainWindow::MainWindow()
 {
-	settings = settingsPointer;
+	QDir dir;
+	QString path = dir.homePath() + "/.tractor/";
+	dir.mkpath(path);
+	settings = new TSettings(path);
+	server = new TServer(settings->port, settings->maxconnections, path + "sharedlist.xml");
+	client = new TClient(path + "sharedlist.xml", settings->sharedfiles, settings->temporaryfiles, settings->completedfiles, settings->port);
 	setuptoolbar();
 	setupwindow();
 	setupstatus();
 	connectui();
+	selectedserver = new QString("");
 	setTheme(settings->theme);
+	client->updateSharedList();
 }
 
 void MainWindow::setuptoolbar()
@@ -99,7 +106,6 @@ void MainWindow::setuptoolbar()
 
 	QWidget *layoutContainerRight = new QWidget;
 	layoutContainerRight->setLayout(barLayout);
-
 	toolBar->addWidget(layoutContainerLeft);
 	toolBar->addSeparator();
 	toolBar->addWidget(layoutContainerRight);
@@ -110,13 +116,13 @@ void MainWindow::setuptoolbar()
 void MainWindow::setupwindow()
 {
 	/* Elements definition */
-	serversPage = new ServersPage;
+	serversPage = new ServersPage(client);
 
-	searchPage = new SearchPage;
+	searchPage = new SearchPage(client);
 
-	sharedPage = new SharedPage;
+	sharedPage = new SharedPage(client);
 
-	downloadsPage =	new	DownloadsPage;
+	downloadsPage =	new	DownloadsPage(client);
 	downloadsPage->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
 	downloadsPage->setFixedWidth(230);
 
@@ -160,7 +166,9 @@ void MainWindow::connectui()
 	connect(sharedButton, SIGNAL(selected(int)), pages, SLOT(setCurrentIndex(int)));
 	connect(optionsButton, SIGNAL(clicked()), this, SLOT(modifySettings()));
 	connect(downloadsButton, SIGNAL(toggled(bool)), downloadsPage, SLOT(setVisible(bool)));
-	connect(serversPage, SIGNAL(newEvent(QString)), this, SLOT(eventToStatusBar(QString)));
+	connect(serversPage, SIGNAL(serverSelected(QString)), this, SLOT(serverSelected(QString)));
+	connect(client, SIGNAL(serverConnected()), this, SLOT(connectionSuccessful()));
+	connect(client, SIGNAL(fileReceived(QString, QString, QString, QString, QString, QString)), searchPage, SLOT(addResult(QString, QString, QString, QString, QString, QString)));
 }
 
 void MainWindow::setTheme(QString theme)
@@ -178,19 +186,9 @@ void MainWindow::setTheme(QString theme)
 	downIcon->setPixmap(down);
 }
 
-void MainWindow::about()
-{
-	QMessageBox::information(this, "About Tractor", "Tractor 0.1<br><br>© 2007 MyProSoft<br><br>Marco Baccarani <bacca87@hotmail.com><br>Riccardo Pedrielli <vortex@ngi.it><br>Luca Puddu <asd@forevernoob.com<br><br>This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.");
-}
-
-void MainWindow::notImplemented()
-{
-	QMessageBox::information(this, "Not implemented", "This functionality has not been implemented yet.");
-}
-
 void MainWindow::modifySettings()
 {
-	optionsWindow = new OptionsWindow;
+	OptionsWindow *optionsWindow = new OptionsWindow;
 	optionsWindow->setModal(true);
 	optionsWindow->connectionPage->portEdit->setText(QVariant(settings->port).toString());
 	optionsWindow->connectionPage->maxconEdit->setText(QVariant(settings->maxconnections).toString());
@@ -213,7 +211,18 @@ void MainWindow::modifySettings()
 	optionsButton->setChecked(false);
 }
 
-void MainWindow::eventToStatusBar(QString text)
+void MainWindow::showEvent(QString text)
 {
 	statusBar->showMessage(text);
+}
+
+void MainWindow::serverSelected(QString server)
+{
+	*selectedserver = server;
+	showEvent("Connecting to " + server + "...");
+}
+
+void MainWindow::connectionSuccessful()
+{
+	showEvent("Connected to " + *selectedserver);
 }
