@@ -4,14 +4,18 @@
 #include <QtNetwork>
 #include "TClientSocket.h"
 
-class TServer : public QTcpServer
+class TServer : public QThread
 {
 	Q_OBJECT
 
 private:
+	QTcpServer server;
 	void incomingConnection(int socketid);
 	int uid;
 	QString sharedlistpath;
+
+protected:
+    void run();
 
 public:
 	QList<TClientSocket*> socketlist;

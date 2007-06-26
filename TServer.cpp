@@ -5,12 +5,18 @@ TServer::TServer(quint16 port, int maxconn, QString shlipath)
 	uid = 0;
 	sharedlistpath = shlipath;
 	setMaxConnection(maxconn);
-	listen(QHostAddress::Any, port);
+	server.listen(QHostAddress::Any, port);
+	start();
+}
+
+void TServer::run()
+{
+	exec();
 }
 
 void TServer::setMaxConnection(int maxconn)
 {
-	setMaxPendingConnections(maxconn);
+	server.setMaxPendingConnections(maxconn);
 }
 
 void TServer::incomingConnection(int socketid)

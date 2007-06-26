@@ -149,7 +149,7 @@ void SearchPage::addResult(QString fid, QString name, QString dim, QString sourc
 		if(((SearchView *)searchPages->widget(i))->id == sid.toInt())
 		{
 			QString bytes = dim;
-			float size = dim.toInt();
+			float size = dim.toFloat();
 			int unit = 0;
 			while(size >= 1024 && unit < 5)
 			{
