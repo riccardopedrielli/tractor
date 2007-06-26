@@ -1,13 +1,10 @@
 #include "mainwindow.h"
 
-MainWindow::MainWindow()
+MainWindow::MainWindow(TSettings *settingsp, TServer *serverp, TClient *clientp)
 {
-	QDir dir;
-	QString path = dir.homePath() + "/.tractor/";
-	dir.mkpath(path);
-	settings = new TSettings(path);
-	server = new TServer(settings->port, settings->maxconnections, path + "sharedlist.xml");
-	client = new TClient(path + "sharedlist.xml", settings->sharedfiles, settings->temporaryfiles, settings->completedfiles, settings->port);
+	settings = settingsp;
+	server = serverp;
+	client = clientp;
 	setuptoolbar();
 	setupwindow();
 	setupstatus();

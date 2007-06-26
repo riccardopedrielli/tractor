@@ -17,7 +17,7 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	MainWindow();
+	MainWindow(TSettings *settingsp, TServer *serverp, TClient *clientp);
 
 private:
 	TSettings *settings;

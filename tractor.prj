@@ -1,9 +1,3 @@
-[Debug Settings]
-Program Arguments=
-Selected Debugger=0
-Source Paths=
-Symbol Paths=
-Working Directory=
 [Files]
 0=icons.qrc
 1=info_structs.h
@@ -33,38 +27,36 @@ Working Directory=
 25=tractor.pro
 26=TSettings.cpp
 27=TSettings.h
+[Debug Settings]
+Program Arguments=
+Selected Debugger=0
+Source Paths=
+Symbol Paths=
+Working Directory=
 [Open Files]
 Active File Display Mode=3
-Active File Index=6
+Active File Index=4
 Open File Line0=0
 Open File Line1=0
 Open File Line2=0
 Open File Line3=0
-Open File Line4=4764
-Open File Line5=610
-Open File Line6=2956
+Open File Line4=0
 Open File Pos0=214
 Open File Pos1=53
 Open File Pos2=48
 Open File Pos3=296
-Open File Pos4=5689
-Open File Pos5=973
-Open File Pos6=3558
+Open File Pos4=54
 Open File Window Pos0=0,1,-1,-1,-4,-30,88,116,808,420
 Open File Window Pos1=0,1,-1,-1,-4,-30,110,145,830,449
 Open File Window Pos2=0,1,-1,-1,-4,-30,66,87,782,405
 Open File Window Pos3=0,1,-1,-1,-4,-30,0,0,720,304
-Open File Window Pos4=0,1,-1,-1,-4,-30,22,29,742,333
-Open File Window Pos5=0,1,-1,-1,-4,-30,88,116,808,420
-Open File Window Pos6=2,3,-1,-1,-4,-30,110,145,830,449
+Open File Window Pos4=2,3,-1,-1,-4,-30,22,29,742,333
 Open File0=.\tractor.pro
 Open File1=.\icons.qrc
 Open File2=.\main.cpp
 Open File3=.\mainwindow.h
 Open File4=.\mainwindow.cpp
-Open File5=.\pages\search.h
-Open File6=.\pages\search.cpp
-Open File7=
+Open File5=
 [uemakeXp]
 Compiler=Configs\MinGW Compiler\Win32 Console Application
 ReleaseMode=0
@@ -82,7 +74,7 @@ Using VCS=0
 Save Account=0
 Create Tagfile=0
 CTags Legacy Support=0
-Working Time=57104
+Working Time=84021
 [Files - pages]
 0=pages\shared.cpp
 1=pages\downloads.h
@@ -98,6 +90,8 @@ Working Time=57104
 0=pages
 [Folders]
 pages=1
+[Project ID]
+Signature=UE Proj: v.1
 [Configs\MinGW Compiler\Win32 Console Application]
 -Wctor-dtor-privacy=no
 -Weffc++=no
@@ -175,5 +169,3 @@ VTableGC=no
 Warnings=
 Working Directory=.
 Writable Strings=no
-[Project ID]
-Signature=UE Proj: v.1
