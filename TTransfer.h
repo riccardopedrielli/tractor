@@ -51,6 +51,8 @@ public:
 
 signals:
 	void deleteTransfer(TTransfer *transfer);
+	void newSpeed(quint64 speed);
+	void newSize(quint64 size);
 
 private slots:
 	void onRead();

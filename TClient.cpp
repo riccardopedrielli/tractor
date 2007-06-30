@@ -3,8 +3,6 @@
 #include "TXml.h"
 #include "info_structs.h"
 
-#include <QMessageBox>
-
 TClient::TClient(QString shlipath, QString shpath, QString tmppath,
 				 QString inpath, quint16 serverport)
 {
@@ -133,13 +131,12 @@ void TClient::find(QString filename, quint64 sid)
 
 void TClient::getFile(QString name, QString fid, QString dim)
 {
-	QMessageBox::information((QWidget *)parent(), "Debug information", "getFile(" + name + ", " + fid + ", " + dim + ")");
 	TTransfer *transfer = new TTransfer(name, fid, dim.toULongLong(), temppath,
 			incomingpath, sharedlistpath);
 
 	connect(transfer, SIGNAL(deleteTransfer(TTransfer*)), this, SLOT(deleteTransfer(TTransfer*)));
 	transferslist.append(transfer);
-	emit newTransfer(fid);
+	emit newTransfer(transfer);
 	client.write(TParser::getIp(fid).toAscii());
 }
 

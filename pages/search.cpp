@@ -62,7 +62,6 @@ void SearchView::contextMenuEvent(QContextMenuEvent *event)
 
 void SearchView::addToDownloads(QTreeWidgetItem *item)
 {
-	QMessageBox::information(this, "Debug information", "getFile(" + item->text(0) + ", " + item->text(4).toLower() + ", " + item->data(1, Qt::ToolTipRole).toString() + ")");
 	client->getFile(item->text(0), item->text(4).toLower(), item->data(1, Qt::ToolTipRole).toString());
 }
 

@@ -68,6 +68,7 @@ void TTransfer::onRead()
 	QByteArray line = client.readAll();
 	bytesrecived += line.size();
 	file.write(line);
+	emit newSize(file.size());
 }
 
 void TTransfer::onDisconnect()
@@ -118,6 +119,7 @@ void TTransfer::downSpeed()
 {
 	downloadspeed = bytesrecived;
 	bytesrecived = 0;
+	emit newSpeed(downloadspeed);
 }
 
 TTransfer::~TTransfer()

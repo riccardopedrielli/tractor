@@ -42,7 +42,7 @@ signals:
 	void serverDisconnected();
 	void messageOfTheDay(QString message);
 	void connectionError(QString error);
-	void newTransfer(QString fid);
+	void newTransfer(TTransfer *transfer);
 
 private slots:
 	void onRead();

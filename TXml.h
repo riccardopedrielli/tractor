@@ -18,7 +18,7 @@ public:
 			InfoTagName settagname, QString setvalue);
 	static QStringList getPathList(QString xmlpath);
 	static bool deleteFile(QString xmlpath, InfoTagName tagname, QString value);
-	static QList<FileInfo> TXml::getFileList(QString xmlpath);
+	static QList<FileInfo> getFileList(QString xmlpath);
 };
 
 #endif //TXML_H
