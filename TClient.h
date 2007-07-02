@@ -32,7 +32,7 @@ public:
 	QStringList updateSharedList();
 
 signals:
-	void fileReceived(QString fid, QString name, QString dim, QString sources, 
+	void fileReceived(QString fid, QString name, QString dim, QString sources,
 		QString complete, QString sid);
 	void serverConnected();
 	void serverDisconnected();
@@ -46,5 +46,5 @@ private slots:
 	void onDisconnect();
 	void deleteTransfer(TTransfer *transfer);
 };
- 
+
 #endif //TCLENT_H

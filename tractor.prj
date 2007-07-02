@@ -1,3 +1,9 @@
+[Debug Settings]
+Program Arguments=
+Selected Debugger=0
+Source Paths=
+Symbol Paths=
+Working Directory=
 [Files]
 0=icons.qrc
 1=info_structs.h
@@ -27,12 +33,6 @@
 25=tractor.pro
 26=TSettings.cpp
 27=TSettings.h
-[Debug Settings]
-Program Arguments=
-Selected Debugger=0
-Source Paths=
-Symbol Paths=
-Working Directory=
 [Open Files]
 Active File Display Mode=3
 Active File Index=8
@@ -88,7 +88,7 @@ ReleaseMode=0
 Compilable=0
 Use Relative Directory=1
 Relative to Project File=1
-Project Start=D707070001000200010035001B00000039
+Project Start=D7070700010002000B003000370000005A
 Project Directory=S:\dev\qt\tractor\trunk\client
 Include Sub Directories=1
 Project Tagfile=
@@ -98,7 +98,7 @@ Using VCS=0
 Save Account=0
 Create Tagfile=0
 CTags Legacy Support=0
-Working Time=162867
+Working Time=162908
 [Files - pages]
 0=pages\shared.cpp
 1=pages\downloads.h
@@ -114,8 +114,6 @@ Working Time=162867
 0=pages
 [Folders]
 pages=1
-[Project ID]
-Signature=UE Proj: v.1
 [Configs\MinGW Compiler\Win32 Console Application]
 -Wctor-dtor-privacy=no
 -Weffc++=no
@@ -193,3 +191,5 @@ VTableGC=no
 Warnings=
 Working Directory=.
 Writable Strings=no
+[Project ID]
+Signature=UE Proj: v.1

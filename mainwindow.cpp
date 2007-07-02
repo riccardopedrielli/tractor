@@ -2,6 +2,7 @@
 
 MainWindow::MainWindow(TSettings *settingsp, TServer *serverp, TClient *clientp)
 {
+	timer = new QTimer;
 	settings = settingsp;
 	server = serverp;
 	client = clientp;
@@ -11,6 +12,7 @@ MainWindow::MainWindow(TSettings *settingsp, TServer *serverp, TClient *clientp)
 	connectui();
 	selectedserver = new QString("");
 	setTheme(settings->theme);
+	timer->start(1000);
 	client->updateSharedList();
 }
 
@@ -61,7 +63,7 @@ void MainWindow::setuptoolbar()
 	upSpeed = new QLabel;
 	upSpeed->setFixedWidth(65);
 	upSpeed->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-	upSpeed->setText("20 KB/s");
+	upSpeed->setText("0.0 B/s");
 
 	downIcon = new QLabel;
 	downLabel = new QLabel;
@@ -69,7 +71,7 @@ void MainWindow::setuptoolbar()
 	downSpeed = new QLabel;
 	downSpeed->setFixedWidth(65);
 	downSpeed->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-	downSpeed->setText("863 KB/s");
+	downSpeed->setText("0.0 B/s");
 
 	/* Layout definition */
 	QHBoxLayout *buttonsLayout = new QHBoxLayout;
@@ -166,6 +168,7 @@ void MainWindow::connectui()
 	connect(serversPage, SIGNAL(serverSelected(QString)), this, SLOT(serverSelected(QString)));
 	connect(client, SIGNAL(serverConnected()), this, SLOT(connectionSuccessful()));
 	connect(client, SIGNAL(fileReceived(QString, QString, QString, QString, QString, QString)), searchPage, SLOT(addResult(QString, QString, QString, QString, QString, QString)));
+	connect(timer, SIGNAL(timeout()), this, SLOT(updateSpeeds()));
 }
 
 void MainWindow::setTheme(QString theme)
@@ -222,4 +225,33 @@ void MainWindow::serverSelected(QString server)
 void MainWindow::connectionSuccessful()
 {
 	showEvent("Connected to " + *selectedserver);
+}
+
+void MainWindow::updateSpeeds()
+{
+	float speed = 0;
+	foreach(TTransfer *transfer, client->transferslist)
+	{
+		speed += transfer->getDownloadSpeed();
+	}
+	int unit = 0;
+	while(speed >= 1024 && unit < 3)
+	{
+		speed /= 1024;
+		unit++;
+	}
+	QString parsedSpeed;
+	switch(unit)
+	{
+		case 0:
+			parsedSpeed = parsedSpeed.setNum(speed, 'f', 1) + " B/s";
+			break;
+		case 1:
+			parsedSpeed = parsedSpeed.setNum(speed, 'f', 1) + " KB/s";
+			break;
+		case 2:
+			parsedSpeed = parsedSpeed.setNum(speed, 'f', 1) + " MB/s";
+			break;
+	}
+	downSpeed->setText(parsedSpeed);
 }

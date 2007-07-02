@@ -16,19 +16,19 @@ void TServer::setMaxConnection(int maxconn)
 }
 
 void TServer::incomingConnection(int socketid)
-{	
+{
 	TClientSocketThread *clientSocketThread = new TClientSocketThread(socketid, ++uid, sharedlistpath, this);
 	socketlist.append(clientSocketThread->socket);
 }
 
 void TServer::deleteUpload(TClientSocket *socket)
 {
-	int dim = socketlist.count();	
+	int dim = socketlist.count();
 	for (int i = 0; i < dim;i++)
 	{
 		if(socketlist[i] == socket)
 		{
-			socketlist.removeAt(i);			
+			socketlist.removeAt(i);
 			break;
 		}
 	}

@@ -15,7 +15,7 @@ private:
 
 public:
 	QList<TClientSocket*> socketlist;
-	
+
 	TServer(quint16 port, int maxconn, QString shlipath);
 	void setMaxConnection(int maxconn);
 

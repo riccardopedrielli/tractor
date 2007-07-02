@@ -5,11 +5,11 @@
 #include "TXml.h"
 #include "TClient.h"
 
-TTransfer::TTransfer(QString filename, QString fileid, quint64 filedim, 
+TTransfer::TTransfer(QString filename, QString fileid, quint64 filedim,
 			QString tmppath, QString inpath, QString shlipath)
 {
 	name = filename;
-	id = fileid; 
+	id = fileid;
 	totdim = filedim;
 	hostindex = 0;
 	bytesrecived = 0;
@@ -19,7 +19,7 @@ TTransfer::TTransfer(QString filename, QString fileid, quint64 filedim,
 
 	file.setFileName( tmppath + "/" + filename +".part");
 	file.open(QIODevice::Append);
-	
+
 	QFileInfo fileinfo(file);
 
 	TXml::writeFileInfo(
@@ -31,7 +31,7 @@ TTransfer::TTransfer(QString filename, QString fileid, quint64 filedim,
 		QString("no"),
 		fileinfo.absoluteFilePath()
 	);
-	
+
 	connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
 	connect(&socket, SIGNAL(connected()), this, SLOT(onConnect()));
 	connect(&socket, SIGNAL(readyRead()), this, SLOT(onRead()));
@@ -39,7 +39,7 @@ TTransfer::TTransfer(QString filename, QString fileid, quint64 filedim,
 	connect(&socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(error(QAbstractSocket::SocketError)));
 	connect(&iptimer, SIGNAL(timeout()), this, SLOT(tryToConnect()));
 	connect(&downloadtimer,SIGNAL(timeout()), this, SLOT(downSpeed()));
-	
+
 	start();
 }
 
@@ -77,13 +77,13 @@ void TTransfer::onDisconnect()
 		QString tmp = "";
 		TXml::setFileInfo(sharedlistpath,TAG_ID,id,TAG_COMPLETE,QString("yes"));
 
-		for(int i = 1; !file.rename(incomingpath+"/"+tmp+name); i++)			
+		for(int i = 1; !file.rename(incomingpath+"/"+tmp+name); i++)
 			tmp="("+QString::number(i)+")";
 
 		remove();
 		return;
 	}
-	
+
 	iptimer.start(WAITING_TIME);
 }
 
@@ -105,8 +105,8 @@ void TTransfer::tryToConnect()
 
 	if (hostindex == count)
 		hostindex = 0;
-	
-	socket.connectToHost(hostlist[hostindex]->host, hostlist[hostindex]->port, QIODevice::ReadWrite);	
+
+	socket.connectToHost(hostlist[hostindex]->host, hostlist[hostindex]->port, QIODevice::ReadWrite);
 	hostindex++;
 	iptimer.start(WAITING_TIME);
 }
@@ -143,7 +143,7 @@ void TTransfer::remove()
 	quit();
 }
 
-/*TTransferThread::TTransferThread(QString pfilename, QString pfileid, quint64 pfiledim, 
+/*TTransferThread::TTransferThread(QString pfilename, QString pfileid, quint64 pfiledim,
 		QString ptmppath, QString pinpath, QString pshlipath)
 {
 	filename = pfilename;

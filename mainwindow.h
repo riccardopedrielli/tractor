@@ -24,6 +24,7 @@ private:
 	TServer *server;
 	TClient *client;
 	QString *selectedserver;
+	QTimer *timer;
 
 	/* ToolBar elements */
 	TToolButton *serversButton;
@@ -58,6 +59,7 @@ private slots:
 	void showEvent(QString text);
 	void serverSelected(QString server);
 	void connectionSuccessful();
+	void updateSpeeds();
 };
 
 #endif //CLIENTWINDOW_H

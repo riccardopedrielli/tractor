@@ -13,32 +13,32 @@ class TTransfer : public QThread
 
 private:
 	QTcpSocket socket;
-	
+
 	struct hostInfo{
 		QString host;
 		quint16 port;
 	};
-	
-	QTimer iptimer, 
+
+	QTimer iptimer,
 		   downloadtimer;
 
 	QString name,
 			id,
 			sharedlistpath,
 			incomingpath;
-	
+
 	quint64	bytesrecived,
 			downloadspeed;
 
 	qint64 totdim;
 	int hostindex;
-	QList<hostInfo*> hostlist;	
+	QList<hostInfo*> hostlist;
 	QFile file;
 
 protected:
     void run();
 
-public:	
+public:
 	void remove();
 	QString getName(){return name;};
 	QString getId(){return id;};
@@ -46,7 +46,7 @@ public:
 	quint64 getCurDim(){return file.size();};
 	quint64 getDownloadSpeed(){return downloadspeed;};
 	void addHost(QString newhost, quint16 port);
-	TTransfer(QString filename, QString fileid, quint64 filedim, 
+	TTransfer(QString filename, QString fileid, quint64 filedim,
 		QString tmppath, QString inpath, QString shlipath);
 	~TTransfer();
 
@@ -71,7 +71,7 @@ private slots:
 private:
 	QString filename;
 	QString fileid;
-	quint64 filedim; 
+	quint64 filedim;
 	QString tmppath;
 	QString inpath;
 	QString shlipath;
@@ -81,7 +81,7 @@ protected:
 
 public:
 	TTransfer *transfer;
-	TTransferThread(QString pfilename, QString pfileid, quint64 pfiledim, 
+	TTransferThread(QString pfilename, QString pfileid, quint64 pfiledim,
 		QString ptmppath, QString pinpath, QString pshlipath);
 };*/
 
