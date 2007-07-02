@@ -33,12 +33,13 @@ TTransfer::TTransfer(QString filename, QString fileid, quint64 filedim,
 	);
 	
 	connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
-	connect(&client, SIGNAL(connected()), this, SLOT(onConnect()));
-	connect(&client, SIGNAL(readyRead()), this, SLOT(onRead()));
-	connect(&client, SIGNAL(disconnected()), this, SLOT(onDisconnect()));
-	connect(&client, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(error(QAbstractSocket::SocketError)));
+	connect(&socket, SIGNAL(connected()), this, SLOT(onConnect()));
+	connect(&socket, SIGNAL(readyRead()), this, SLOT(onRead()));
+	connect(&socket, SIGNAL(disconnected()), this, SLOT(onDisconnect()));
+	connect(&socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(error(QAbstractSocket::SocketError)));
 	connect(&iptimer, SIGNAL(timeout()), this, SLOT(tryToConnect()));
 	connect(&downloadtimer,SIGNAL(timeout()), this, SLOT(downSpeed()));
+	
 	start();
 }
 
@@ -51,21 +52,16 @@ void TTransfer::addHost(QString newhost, quint16 port)
 	iptimer.start(WAITING_TIME);
 }
 
-void TTransfer::run()
-{
-	exec();
-}
-
 void TTransfer::onConnect()
 {
 	iptimer.stop();
 	downloadtimer.start(1000);
-	client.write(TParser::getFile(id,file.size()).toAscii());
+	socket.write(TParser::getFile(id,file.size()).toAscii());
 }
 
 void TTransfer::onRead()
 {
-	QByteArray line = client.readAll();
+	QByteArray line = socket.readAll();
 	bytesrecived += line.size();
 	file.write(line);
 	emit newSize(file.size());
@@ -110,7 +106,7 @@ void TTransfer::tryToConnect()
 	if (hostindex == count)
 		hostindex = 0;
 	
-	client.connectToHost(hostlist[hostindex]->host, hostlist[hostindex]->port, QIODevice::ReadWrite);	
+	socket.connectToHost(hostlist[hostindex]->host, hostlist[hostindex]->port, QIODevice::ReadWrite);	
 	hostindex++;
 	iptimer.start(WAITING_TIME);
 }
@@ -130,14 +126,38 @@ TTransfer::~TTransfer()
 		delete hostlist[i];
 }
 
+void TTransfer::run()
+{
+	exec();
+}
+
 void TTransfer::remove()
 {
-	if(client.state()>QAbstractSocket::UnconnectedState)
+	if(socket.state()>QAbstractSocket::UnconnectedState)
 	{
-		client.disconnectFromHost();
-		client.waitForDisconnected();
+		socket.disconnectFromHost();
+		socket.waitForDisconnected();
 	}
 	emit deleteTransfer(this);
 	file.close();
 	quit();
 }
+
+/*TTransferThread::TTransferThread(QString pfilename, QString pfileid, quint64 pfiledim, 
+		QString ptmppath, QString pinpath, QString pshlipath)
+{
+	filename = pfilename;
+	fileid = pfileid;
+	filedim = pfiledim;
+	tmppath = ptmppath;
+	inpath = pinpath;
+	shlipath = pshlipath;
+	start();
+}
+
+void TTransferThread::run()
+{
+	transfer = new TTransfer(filename, fileid, filedim, tmppath,
+				inpath, shlipath);
+	exec();
+}*/

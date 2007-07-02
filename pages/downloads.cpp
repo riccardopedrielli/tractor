@@ -10,7 +10,7 @@ Download::Download(TTransfer *tp)
 	size = 0;
 	speed = 0;
 	
-	setToolTip("File: <b>" + name + "</b>\nSize: " + totalsize + "\nDownloaded: " + size + "\nSpeed: " + speed + "\nId: " + fid);
+	updateToolTip();
 
 	setText(name);
 	
@@ -18,16 +18,21 @@ Download::Download(TTransfer *tp)
 	connect(transfer, SIGNAL(newSize(quint64)), this, SLOT(newSize(quint64)));
 }
 
+void Download::updateToolTip()
+{
+	setToolTip("File: <b>" + name + "</b><br>Size: " + QVariant(totalsize).toString() + "<br>Downloaded: " + QVariant(size).toString() + "<br>Speed: " + QVariant(speed).toString() + "<br>Id: " + fid);
+}
+
 void Download::newSpeed(quint64 newspeed)
 {
 	speed = newspeed;
-	setToolTip("File: <b>" + name + "</b>\nSize: " + totalsize + "\nDownloaded: " + size + "\nSpeed: " + speed + "\nId: " + fid);
+	updateToolTip();
 }
 
 void Download::newSize(quint64 newsize)
 {
 	size = newsize;
-	setToolTip("File: <b>" + name + "</b>\nSize: " + totalsize + "\nDownloaded: " + size + "\nSpeed: " + speed + "\nId: " + fid);
+	updateToolTip();
 	if(size == totalsize)
 		setForeground(QBrush(QColor(255, 0, 0)));
 }

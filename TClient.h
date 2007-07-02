@@ -6,12 +6,11 @@
 #include "TTransfer.h"
 #include "TShared.h"
 
-class TClient : public QThread
+class TClient : public QTcpSocket
 {
 	Q_OBJECT
 
 private:
-	QTcpSocket client;
 	TShared shared;
 
 	//general settings
@@ -20,9 +19,6 @@ private:
 			sharepath,
 			temppath,
 			incomingpath;
-
-protected:
-    void run();
 
 public:
 	QList<TTransfer*> transferslist;
@@ -48,7 +44,6 @@ private slots:
 	void onRead();
 	void onConnect();
 	void onDisconnect();
-	void error(QAbstractSocket::SocketError socketerror);
 	void deleteTransfer(TTransfer *transfer);
 };
  

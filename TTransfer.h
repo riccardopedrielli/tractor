@@ -12,6 +12,8 @@ class TTransfer : public QThread
 	Q_OBJECT
 
 private:
+	QTcpSocket socket;
+	
 	struct hostInfo{
 		QString host;
 		quint16 port;
@@ -29,7 +31,6 @@ private:
 			downloadspeed;
 
 	qint64 totdim;
-	QTcpSocket client;	
 	int hostindex;
 	QList<hostInfo*> hostlist;	
 	QFile file;
@@ -62,4 +63,26 @@ private slots:
 	void tryToConnect();
 	void downSpeed();
 };
+
+/*class TTransferThread : public QThread
+{
+	Q_OBJECT
+
+private:
+	QString filename;
+	QString fileid;
+	quint64 filedim; 
+	QString tmppath;
+	QString inpath;
+	QString shlipath;
+
+protected:
+    void run();
+
+public:
+	TTransfer *transfer;
+	TTransferThread(QString pfilename, QString pfileid, quint64 pfiledim, 
+		QString ptmppath, QString pinpath, QString pshlipath);
+};*/
+
 #endif //TTRANSFER_H

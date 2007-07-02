@@ -18,6 +18,7 @@ private:
 	QString name;
 	QString fid;
 	quint64 speed;
+	void updateToolTip();
 
 private slots:
 	void newSpeed(quint64 newspeed);

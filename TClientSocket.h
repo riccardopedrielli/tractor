@@ -3,13 +3,12 @@
 
 #include <QtNetwork>
 
-class TClientSocket : public QThread
+class TClientSocket : public QTcpSocket
 {
 	Q_OBJECT
 
 private:
-	QTcpSocket socket;
-	
+	QObject *parent;
 	QString name,
 			id,
 			host,
@@ -24,15 +23,12 @@ private:
 	
 	void getFile(QString command);
 
-protected:
-    void run();
-
 public:
-	TClientSocket(int socketid, int upid, QString shlipath);
+	TClientSocket(int socketid, int upid, QString shlipath, QObject *pparent);
 	int getUploadId(){return uid;};
 	QString getName(){return name;};
 	QString getId(){return id;};
-	QString getHost(){return socket.peerName();};
+	QString getHost(){return peerName();};
 	quint64 getUploadSpeed(){return upspeed;};	
 
 signals:
@@ -44,6 +40,24 @@ private slots:
 	void onRead();
 	void onDisconnect();
 	void upSpeed();
+};
+
+class TClientSocketThread : public QThread
+{
+	Q_OBJECT
+
+private:
+	QObject *parent;
+	int socketid;
+	int upid;
+	QString shlipath;
+
+protected:
+    void run();
+
+public:
+	TClientSocket *socket;
+	TClientSocketThread(int psocketid, int pupid, QString pshlipath, QObject *pparent);
 };
 
 #endif //TCLIENTSOCKET_H

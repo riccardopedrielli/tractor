@@ -13,16 +13,14 @@ TClient::TClient(QString shlipath, QString shpath, QString tmppath,
 	srvport = serverport;
 
 	connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
-	connect(&client, SIGNAL(connected()), this, SLOT(onConnect()));
-	connect(&client, SIGNAL(readyRead()), this, SLOT(onRead()));
-	connect(&client, SIGNAL(disconnected()), this, SLOT(onDisconnect()));
-	connect(&client, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(error(QAbstractSocket::SocketError)));
-	start();
+	connect(this, SIGNAL(connected()), this, SLOT(onConnect()));
+	connect(this, SIGNAL(readyRead()), this, SLOT(onRead()));
+	connect(this, SIGNAL(disconnected()), this, SLOT(onDisconnect()));
 }
 
 bool TClient::isConnected()
 {
-	if(client.state() == QAbstractSocket::ConnectedState)
+	if(state() == QAbstractSocket::ConnectedState)
 		return true;
 	return false;
 }
@@ -34,7 +32,7 @@ QStringList TClient::updateSharedList()
 
 	int dim = idlist.count();
 	for (int i = 0; i < dim; i++)
-		client.write(TParser::delFile(idlist.at(i)).toAscii());
+		write(TParser::delFile(idlist.at(i)).toAscii());
 
 	duplist = shared.updateShareList(sharepath, sharedlistpath);
 	duplist = duplist + shared.updateShareList(incomingpath, sharedlistpath);
@@ -43,17 +41,12 @@ QStringList TClient::updateSharedList()
 
 void TClient::connectToServer(QString address, quint16 port)
 {
-	client.connectToHost(address,port,QIODevice::ReadWrite);
-}
-
-void TClient::run()
-{
-	exec();
+	connectToHost(address,port,QIODevice::ReadWrite);
 }
 
 void TClient::onConnect()
 {
-	client.write(TParser::port(srvport).toAscii());
+	write(TParser::port(srvport).toAscii());
 	emit serverConnected();
 	QList<FileInfo> list = TXml::getFileList(sharedlistpath);
 
@@ -65,14 +58,14 @@ void TClient::onConnect()
 		if(list[i].completes == "yes")
 			complete=1;
 
-		client.write(TParser::addFile(list[i].fid,list[i].name,
+		write(TParser::addFile(list[i].fid,list[i].name,
 					list[i].dim.toULongLong(),complete).toAscii());
 	}
 }
 
 void TClient::onRead()
 {
-	QStringList cmdlist = TParser::splitCommands(client.readLine());
+	QStringList cmdlist = TParser::splitCommands(readLine());
 	int dim = cmdlist.count();
 
 	for(int i=0; i < dim; i++)
@@ -119,14 +112,9 @@ void TClient::onDisconnect()
 	emit serverDisconnected();
 }
 
-void TClient::error(QAbstractSocket::SocketError socketerror)
-{
-	emit connectionError(client.errorString());
-}
-
 void TClient::find(QString filename, quint64 sid)
 {
-	client.write(TParser::find(filename, sid).toAscii());
+	write(TParser::find(filename, sid).toAscii());
 }
 
 void TClient::getFile(QString name, QString fid, QString dim)
@@ -137,7 +125,7 @@ void TClient::getFile(QString name, QString fid, QString dim)
 	connect(transfer, SIGNAL(deleteTransfer(TTransfer*)), this, SLOT(deleteTransfer(TTransfer*)));
 	transferslist.append(transfer);
 	emit newTransfer(transfer);
-	client.write(TParser::getIp(fid).toAscii());
+	write(TParser::getIp(fid).toAscii());
 }
 
 void TClient::deleteTransfer(TTransfer *transfer)

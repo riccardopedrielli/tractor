@@ -141,7 +141,7 @@ void MainWindow::setupwindow()
 	centralWidget->setLayout(mainLayout);
 
 	setCentralWidget(centralWidget);
-	setWindowTitle("Tractor Gui Test - by Vortex");
+	setWindowTitle("Tractor - Because the tractor pull more than the mule");
 	setWindowIcon(QIcon(":/icons/tractor.png"));
 	setWindowState(Qt::WindowMaximized);
 	setMinimumWidth(700);

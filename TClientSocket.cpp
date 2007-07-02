@@ -5,41 +5,34 @@
 
 const int BUFFER_SIZE = 1024; //regolare il buffer se non va bene
 
-TClientSocket::TClientSocket(int socketid, int upid, QString shlipath)
+TClientSocket::TClientSocket(int socketid, int upid, QString shlipath, QObject *pparent)
 {
-	socket.setSocketDescriptor(socketid);
+	parent = pparent;
+	setSocketDescriptor(socketid);
 	uid = upid;
 	sharedlistpath = shlipath;
 
 	connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
-	connect(&socket, SIGNAL(readyRead()), this, SLOT(onRead()));
-	connect(&socket, SIGNAL(disconnected()), this, SLOT(onDisconnect()));	
+	connect(this, SIGNAL(readyRead()), this, SLOT(onRead()));
+	connect(this, SIGNAL(disconnected()), this, SLOT(onDisconnect()));	
 	connect(&uploadtimer,SIGNAL(timeout()), this, SLOT(upSpeed()));	
-
-	start();
-}
-
-void TClientSocket::run()
-{	
-	exec();
 }
 
 void TClientSocket::onRead()
 {	
-	QStringList cmdlist = TParser::splitCommands(socket.readLine());	
+	QStringList cmdlist = TParser::splitCommands(readLine());	
 	QString cmdname = TParser::getCommand(cmdlist[0]);
-
 	if (cmdname == "GETFILE")	
 		getFile(cmdlist[0]);
 	
-	socket.disconnectFromHost();
+	disconnectFromHost();
 }
 
 void TClientSocket::onDisconnect()
 {
 	emit endUpload(uid);
 	emit deleteUpload(this);
-	quit();
+	((QThread *)parent)->quit();
 }
 
 void TClientSocket::getFile(QString command)
@@ -64,14 +57,14 @@ void TClientSocket::getFile(QString command)
 	if(byte.toULongLong()>0)
 		if(file.seek(byte.toULongLong()))		
 			return;
-	
+
 	uploadtimer.start(1000);
 	
 	while(!file.atEnd())
 	{		
 		QByteArray line = file.read(BUFFER_SIZE);
-		bytesend = socket.write(line);
-		socket.waitForBytesWritten();
+		bytesend = write(line);
+		waitForBytesWritten();
 	}
 
 	uploadtimer.stop();
@@ -84,3 +77,18 @@ void TClientSocket::upSpeed()
 	bytesend = 0;
 }
 
+TClientSocketThread::TClientSocketThread(int psocketid, int pupid, QString pshlipath, QObject *pparent)
+{
+	parent = pparent;
+	socketid = psocketid;
+	upid = pupid;
+	shlipath = pshlipath;
+	start();
+}
+
+void TClientSocketThread::run()
+{
+	socket = new TClientSocket(socketid, upid, shlipath, this);
+	connect(socket, SIGNAL(deleteUpload(TClientSocket*)), (TServer *)parent, SLOT(deleteUpload(TClientSocket*)));
+	exec();
+}

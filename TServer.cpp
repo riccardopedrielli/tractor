@@ -1,29 +1,24 @@
 #include "TServer.h"
 
+#include <QMessageBox>
+
 TServer::TServer(quint16 port, int maxconn, QString shlipath)
 {
 	uid = 0;
 	sharedlistpath = shlipath;
 	setMaxConnection(maxconn);
-	server.listen(QHostAddress::Any, port);
-	start();
-}
-
-void TServer::run()
-{
-	exec();
+	listen(QHostAddress::Any, port);
 }
 
 void TServer::setMaxConnection(int maxconn)
 {
-	server.setMaxPendingConnections(maxconn);
+	setMaxPendingConnections(maxconn);
 }
 
 void TServer::incomingConnection(int socketid)
 {	
-	TClientSocket *clientSocket = new TClientSocket(socketid, ++uid, sharedlistpath);
-	connect(clientSocket, SIGNAL(deleteUpload(TClientSocket*)), this, SLOT(deleteUpload(TClientSocket*)));
-	socketlist.append(clientSocket);
+	TClientSocketThread *clientSocketThread = new TClientSocketThread(socketid, ++uid, sharedlistpath, this);
+	socketlist.append(clientSocketThread->socket);
 }
 
 void TServer::deleteUpload(TClientSocket *socket)
@@ -37,4 +32,18 @@ void TServer::deleteUpload(TClientSocket *socket)
 			break;
 		}
 	}
+}
+
+TServerThread::TServerThread(quint16 pport, int pmaxconn, QString pshlipath)
+{
+	port = pport;
+	maxconn = pmaxconn;
+	shlipath = pshlipath;
+	start();
+}
+
+void TServerThread::run()
+{
+	server = new TServer(port, maxconn, shlipath);
+	exec();
 }

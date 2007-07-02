@@ -4,18 +4,14 @@
 #include <QtNetwork>
 #include "TClientSocket.h"
 
-class TServer : public QThread
+class TServer : public QTcpServer
 {
 	Q_OBJECT
 
 private:
-	QTcpServer server;
 	void incomingConnection(int socketid);
 	int uid;
 	QString sharedlistpath;
-
-protected:
-    void run();
 
 public:
 	QList<TClientSocket*> socketlist;
@@ -26,6 +22,23 @@ public:
 private slots:
 	void deleteUpload(TClientSocket *socket);
 
+};
+
+class TServerThread : public QThread
+{
+	Q_OBJECT
+
+private:
+	quint16 port;
+	int maxconn;
+	QString shlipath;
+
+protected:
+    void run();
+
+public:
+	TServer *server;
+	TServerThread(quint16 port, int maxconn, QString shlipath);
 };
 
 #endif //TSERVER_H
