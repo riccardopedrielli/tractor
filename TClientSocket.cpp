@@ -15,7 +15,7 @@ TClientSocket::TClientSocket(int socketid, int upid, QString shlipath, QObject *
 	connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
 	connect(this, SIGNAL(readyRead()), this, SLOT(onRead()));
 	connect(this, SIGNAL(disconnected()), this, SLOT(onDisconnect()));	
-	connect(&uploadtimer,SIGNAL(timeout()), this, SLOT(upSpeed()));	
+	connect(&uploadtimer, SIGNAL(timeout()), this, SLOT(upSpeed()));	
 }
 
 void TClientSocket::onRead()
@@ -30,8 +30,9 @@ void TClientSocket::onRead()
 
 void TClientSocket::onDisconnect()
 {
-	emit endUpload(uid);
+	emit endUpload(this);
 	emit deleteUpload(this);
+	disconnect(this, 0, 0, 0);
 	((QThread *)parent)->quit();
 }
 
@@ -47,8 +48,6 @@ void TClientSocket::getFile(QString command)
 
 	name = xname;
 	id = xid;
-
-	emit newUpload(uid);
 
 	QFile file(xpath);
 	if(!file.open(QIODevice::ReadOnly))
@@ -75,6 +74,7 @@ void TClientSocket::upSpeed()
 {
 	upspeed = bytesend;
 	bytesend = 0;
+	emit newSpeed();
 }
 
 TClientSocketThread::TClientSocketThread(int psocketid, int pupid, QString pshlipath, QObject *pparent)
@@ -83,12 +83,12 @@ TClientSocketThread::TClientSocketThread(int psocketid, int pupid, QString pshli
 	socketid = psocketid;
 	upid = pupid;
 	shlipath = pshlipath;
-	start();
 }
 
 void TClientSocketThread::run()
 {
 	socket = new TClientSocket(socketid, upid, shlipath, this);
 	connect(socket, SIGNAL(deleteUpload(TClientSocket*)), (TServer *)parent, SLOT(deleteUpload(TClientSocket*)));
+	emit socketCreated(socket);
 	exec();
 }

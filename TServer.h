@@ -14,13 +14,17 @@ private:
 	QString sharedlistpath;
 
 public:
-	QList<TClientSocket*> socketlist;
+	QList<TClientSocket *> socketlist;
 
 	TServer(quint16 port, int maxconn, QString shlipath);
 	void setMaxConnection(int maxconn);
 
+signals:
+	void newUpload(TClientSocket *socket);
+
 private slots:
 	void deleteUpload(TClientSocket *socket);
+	void socketCreated(TClientSocket *socket);
 
 };
 

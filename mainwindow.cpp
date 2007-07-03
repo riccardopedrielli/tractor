@@ -119,7 +119,7 @@ void MainWindow::setupwindow()
 
 	searchPage = new SearchPage(client);
 
-	sharedPage = new SharedPage(client);
+	sharedPage = new SharedPage(server);
 
 	downloadsPage =	new	DownloadsPage(client);
 	downloadsPage->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);

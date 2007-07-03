@@ -32,8 +32,8 @@ public:
 	quint64 getUploadSpeed(){return upspeed;};	
 
 signals:
-	void newUpload(int uid);
-	void endUpload(int uid);
+	void newSpeed();
+	void endUpload(TClientSocket *socket);
 	void deleteUpload(TClientSocket *clientsocket);
 
 private slots:
@@ -58,6 +58,9 @@ protected:
 public:
 	TClientSocket *socket;
 	TClientSocketThread(int psocketid, int pupid, QString pshlipath, QObject *pparent);
+
+signals:
+	void socketCreated(TClientSocket *socket);
 };
 
 #endif //TCLIENTSOCKET_H

@@ -85,17 +85,19 @@ void Download::updateToolTip()
 	switch(unit)
 	{
 		case 0:
-			parsedSpeed = parsedSpeed.setNum(dim, 'f', 1) + " B";
+			parsedSpeed = parsedSpeed.setNum(dim, 'f', 1) + " B/s";
 			break;
 		case 1:
-			parsedSpeed = parsedSpeed.setNum(dim, 'f', 1) + " KB";
+			parsedSpeed = parsedSpeed.setNum(dim, 'f', 1) + " KB/s";
 			break;
 		case 2:
-			parsedSpeed = parsedSpeed.setNum(dim, 'f', 1) + " MB";
+			parsedSpeed = parsedSpeed.setNum(dim, 'f', 1) + " MB/s";
 			break;
 	}
+	
+	QString progress = QVariant(size * 100 / totalsize).toString() + "%";
 
-	setToolTip("<font size=4><table width=600><tr><td>File: <b>" + name + "</b></td></tr><tr><td><br>Size: " + parsedTotalSize + "</td></tr><tr><td><br>Downloaded: " + parsedSize + "</td></tr><tr><td><br>Speed: " + parsedSpeed + "</td></tr><tr><td><br>Id: " + fid + "</td></tr></table></font>");
+	setToolTip("<font size=4><table width=600><tr><td colspan=2><b>" + name + "</b><hr></td></tr><tr><td>Size: " + parsedTotalSize + "</td><td>Progress: " + progress + "</td></tr><tr><td>Downloaded: " + parsedSize + "</td><td>Download speed: " + parsedSpeed + "</td></tr><tr><td colspan=2><hr></td></tr><tr><td colspan=2>ID: " + fid.toUpper() + "</td></tr></table></font>");
 }
 
 void Download::newSpeed(quint64 newspeed)
